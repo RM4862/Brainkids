@@ -1,0 +1,7 @@
+Django>=4.2,<5
+mysqlclient>=2.2
+requests>=2.31
+djangorestframework>=3.14
+django-cors-headers>=4.3
+python-dotenv>=1.0
+social-auth-app-django>=5.4
