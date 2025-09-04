@@ -1,0 +1,4 @@
+google-oauth-client-id==REMOVED
+google-oauth-client-secret==REMOVED
+django-insecure-j%&6oup))y)oe6tley6g5sco1a8fwsb*f&#f_aynza9yh102^t==REMOVED
+12345678a==REMOVED

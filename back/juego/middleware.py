@@ -10,8 +10,8 @@ class SimpleMiddleware:
         response = self.get_response(request)
         # Código después de la vista
         return response
-    
-#Middleware para crear usuarios por OAuth de google
+
+# Middleware para crear usuarios por OAuth de google
 class OAuthUserCreationMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response

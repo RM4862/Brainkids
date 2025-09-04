@@ -7,8 +7,11 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.user.get_username',
     'social_core.pipeline.user.create_user',
     'juego.pipeline.create_usuario',
+    # Asocia la cuenta google con el usuario
     'social_core.pipeline.social_auth.associate_user',
+    #Carga datos adicionales de la cuenta google
     'social_core.pipeline.social_auth.load_extra_data',
+    #Actualiza los datalles del usuario (nombre y correo)
     'social_core.pipeline.user.user_details',
 )
 """
@@ -23,17 +26,22 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+
+
 from pathlib import Path
+from dotenv import load_dotenv
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-j%&6oup))y)oe6tley6g5sco1a8fwsb*f&#f_aynza9yh102^t'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -43,6 +51,7 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -50,23 +59,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'social_django',
-    'juego'
+    'juego',
+    'corsheaders',
 ]
 
-# Google OAuth y social-auth-app-django
-AUTHENTICATION_BACKENDS = (
-    'social_core.backends.google.GoogleOAuth2',
-    'django.contrib.auth.backends.ModelBackend',
-)
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = 'TU_CLIENT_ID'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'TU_CLIENT_SECRET'
-LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -76,6 +77,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'juego.middleware.OAuthUserCreationMiddleware',
 ]
+# CORS settings
+CORS_ALLOW_ALL_ORIGINS = True
 
 ROOT_URLCONF = 'brainkids.urls'
 
@@ -103,11 +106,11 @@ WSGI_APPLICATION = 'brainkids.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'brainkidz',
-        'USER':'root',
-        'PASSWORD':'12345678a',
-        'HOST':'localhost',
-        'PORT':'3306',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 
