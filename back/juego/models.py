@@ -4,7 +4,6 @@ from django.db import models
 class Usuario(models.Model):
     id_usuario = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=100)
-
     usuario = models.CharField(max_length=50, unique=True)
     correo = models.EmailField(unique=True)
     contraseña = models.CharField(max_length=128)
@@ -50,9 +49,18 @@ class Cuento(models.Model):
         return self.titulo
     
 class Linea(models.Model):
-    id_linea = models.CharField(max_length=10, primary_key=True)
+    id_linea = models.CharField(max_length=20, primary_key=True, editable=False)
     contenido_lin = models.CharField(max_length=300)
     cuento = models.ForeignKey('Cuento', on_delete=models.CASCADE, related_name='lineas')
+
+    def save(self, *args, **kwargs):
+        if not self.id_linea:
+            # Obtener el id_cuento
+            id_cuento = self.cuento.id_cuento
+            # Calcular el índice de la línea para este cuento
+            indice = self.cuento.lineas.count() + 1
+            self.id_linea = f"{id_cuento}.lin.{indice}"
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.id_linea
