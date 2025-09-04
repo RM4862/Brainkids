@@ -1,6 +1,14 @@
+
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+import requests
+from .models import Usuario, Mascota, Recompensa, Recurso,Cuento, Linea
+from .models import Pictograma
+from .serializers import UsuarioSerializer, MascotaSerializer, RecompensaSerializer, RecursoSerializer
+from .serializers import  CuentoSerializer, LineaSerializer, PictogramaSerializer
 from rest_framework.decorators import api_view
 from django.contrib.auth.hashers import check_password
-# Endpoint personalizado para login
+
 @api_view(['POST'])
 def usuario_login(request):
     usuario = request.data.get('usuario')
@@ -20,28 +28,23 @@ def usuario_login(request):
     else:
         return Response({'error': 'Contraseña incorrecta'}, status=status.HTTP_401_UNAUTHORIZED)
 
-from rest_framework import viewsets, status
-from rest_framework.response import Response
-import requests
-from .models import Usuario, Mascota, Recompensa, Recurso,Cuento, Linea
-from .models import Pictograma
-from .serializers import UsuarioSerializer, MascotaSerializer, RecompensaSerializer, RecursoSerializer
-from .serializers import  CuentoSerializer, LineaSerializer, PictogramaSerializer
-
 class UsuarioViewSet(viewsets.ModelViewSet):
-	queryset = Usuario.objects.all()
-	serializer_class = UsuarioSerializer
+        queryset = Usuario.objects.all()
+        serializer_class = UsuarioSerializer
 
-	def create(self, request, *args, **kwargs):
-		# Si el usuario viene de OAuth, la contraseña puede ser None o generada
-		data = request.data.copy()
-		if 'oauth' in data and data['oauth']:
-			data['contraseña'] = ''  # O genera una contraseña aleatoria
-		serializer = self.get_serializer(data=data)
-		serializer.is_valid(raise_exception=True)
-		self.perform_create(serializer)
-		headers = self.get_success_headers(serializer.data)
-		return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        def create(self, request, *args, **kwargs):
+            # Si el usuario viene de OAuth, la contraseña puede ser None o generada
+            from django.contrib.auth.hashers import make_password
+            data = request.data.copy()
+            if 'contraseña' in data:
+                data['contraseña'] = make_password(data['contraseña'])
+            if 'oauth' in data and data['oauth']:
+                data['contraseña'] = ''  # O genera una contraseña aleatoria
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 class MascotaViewSet(viewsets.ModelViewSet):
     queryset = Mascota.objects.all()

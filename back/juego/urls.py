@@ -1,4 +1,5 @@
 
+# juego/urls.py
 from django.urls import path, include
 from rest_framework import routers
 from .views import UsuarioViewSet, MascotaViewSet, RecompensaViewSet, RecursoViewSet
@@ -12,7 +13,8 @@ router.register(r'recursos', RecursoViewSet)
 router.register(r'cuentos', CuentoViewSet)
 router.register(r'lineas', LineaViewSet)
 router.register(r'pictogramas', PictogramaViewSet)
+
 urlpatterns = [
+    path('login/', usuario_login),  # <-- login fuera del router
     path('', include(router.urls)),
-    path('usuarios/login/', usuario_login),
 ]
