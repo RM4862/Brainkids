@@ -62,33 +62,36 @@ class Linea(models.Model):
             self.id_linea = f"{id_cuento}.lin.{indice}"
         super().save(*args, **kwargs)
 
-        # Generar pictogramas automáticamente si no existen
-        if not self.pictogramas.exists():
-            import requests
-            from .models import Pictograma
-            texto = self.contenido_lin
-            url = f'https://api.arasaac.org/v1/pictograms/text/{texto}?language=es'
-            response = requests.get(url)
-            if response.status_code == 200:
-                pictogramas = response.json()
-                for pictograma in pictogramas:
-                    id_pic = str(pictograma['id'])
-                    url_imagen = pictograma['url']
-                    Pictograma.objects.create(
-                        id_pic=id_pic,
-                        linea=self,
-                        texto_original=texto,
-                        url_imagen=url_imagen
-                    )
+    def generar_pictogramas(self):
+        import requests, re
+        from .models import Pictograma
+        texto = self.contenido_lin
+        palabras = re.findall(r'\w+', texto.lower())
+        for palabra in palabras:
+            url = f"https://api.arasaac.org/api/pictograms/es/search/{palabra}"
+            pictogramas_res = requests.get(url)
+            if pictogramas_res.status_code == 200:
+                data = pictogramas_res.json()
+                if data:
+                    pictograma_id = data[0]['_id']
+                    pictograma_url = f"https://static.arasaac.org/pictograms/{pictograma_id}/{pictograma_id}_500.png"
+                    if not Pictograma.objects.filter(id_pic=str(pictograma_id), linea=self).exists():
+                        Pictograma.objects.create(
+                            id_pic=str(pictograma_id),
+                            linea=self,
+                            texto_original=palabra,
+                            url_imagen=pictograma_url
+                        )
 
     def __str__(self):
         return self.id_linea
 
 class Pictograma(models.Model):
-    id_pic = models.CharField(max_length=10, primary_key=True)
+    id = models.AutoField(primary_key=True)
+    id_pic = models.CharField(max_length=10)
     linea = models.ForeignKey('Linea', on_delete=models.CASCADE, related_name='pictogramas')
     texto_original = models.CharField(max_length=300)
     url_imagen = models.URLField()  # URL de la imagen del pictograma
 
     def __str__(self):
-        return self.id_pic
+        return f"{self.texto_original} ({self.id_pic})"

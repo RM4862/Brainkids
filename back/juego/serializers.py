@@ -39,6 +39,7 @@ class PictogramaSerializer(serializers.ModelSerializer):
         model = Pictograma
         fields = ['id_pic', 'linea', 'texto_original', 'url_imagen']
 
+
 class LineaSerializer(serializers.ModelSerializer):
     pictogramas = PictogramaSerializer(many=True, read_only=True)
     class Meta:

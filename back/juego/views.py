@@ -71,6 +71,32 @@ class LineaViewSet(viewsets.ModelViewSet):
         if cuento_id:
             return Linea.objects.filter(cuento_id=cuento_id)
         return Linea.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        # Obtener la línea recién creada
+        if response.status_code == 201:
+            linea_id = response.data.get('id_linea')
+            from .models import Linea, Pictograma
+            import requests, re
+            linea = Linea.objects.get(id_linea=linea_id)
+            texto = linea.contenido_lin
+            palabras = re.findall(r'\w+', texto.lower())
+            for palabra in palabras:
+                url = f"https://api.arasaac.org/api/pictograms/es/search/{palabra}"
+                pictogramas_res = requests.get(url)
+                if pictogramas_res.status_code == 200:
+                    data = pictogramas_res.json()
+                    if data:
+                        pictograma_id = data[0]['_id']
+                        pictograma_url = f"https://static.arasaac.org/pictograms/{pictograma_id}/{pictograma_id}_500.png"
+                        Pictograma.objects.create(
+                            id_pic=str(pictograma_id),
+                            linea=linea,
+                            texto_original=palabra,
+                            url_imagen=pictograma_url
+                        )
+        return response
     
 class PictogramaViewSet(viewsets.ModelViewSet):
     queryset = Pictograma.objects.all()
