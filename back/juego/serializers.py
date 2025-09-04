@@ -31,10 +31,19 @@ class CuentoSerializer(serializers.ModelSerializer):
         model = Cuento
         fields = ['id_cuento', 'titulo', 'estado_leido']
 
+
+
+# Definir PictogramaSerializer antes de LineaSerializer
+class PictogramaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pictograma
+        fields = ['id_pic', 'linea', 'texto_original', 'url_imagen']
+
 class LineaSerializer(serializers.ModelSerializer):
+    pictogramas = PictogramaSerializer(many=True, read_only=True)
     class Meta:
         model = Linea
-        fields = ['id_linea', 'contenido_lin', 'cuento']
+        fields = ['id_linea', 'contenido_lin', 'cuento', 'pictogramas']
 
 class PictogramaSerializer(serializers.ModelSerializer):
     class Meta:

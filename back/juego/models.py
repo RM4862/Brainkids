@@ -62,6 +62,25 @@ class Linea(models.Model):
             self.id_linea = f"{id_cuento}.lin.{indice}"
         super().save(*args, **kwargs)
 
+        # Generar pictogramas automáticamente si no existen
+        if not self.pictogramas.exists():
+            import requests
+            from .models import Pictograma
+            texto = self.contenido_lin
+            url = f'https://api.arasaac.org/v1/pictograms/text/{texto}?language=es'
+            response = requests.get(url)
+            if response.status_code == 200:
+                pictogramas = response.json()
+                for pictograma in pictogramas:
+                    id_pic = str(pictograma['id'])
+                    url_imagen = pictograma['url']
+                    Pictograma.objects.create(
+                        id_pic=id_pic,
+                        linea=self,
+                        texto_original=texto,
+                        url_imagen=url_imagen
+                    )
+
     def __str__(self):
         return self.id_linea
 

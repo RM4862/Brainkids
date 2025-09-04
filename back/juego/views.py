@@ -65,6 +65,12 @@ class CuentoViewSet(viewsets.ModelViewSet):
 class LineaViewSet(viewsets.ModelViewSet):
     queryset = Linea.objects.all()
     serializer_class = LineaSerializer
+
+    def get_queryset(self):
+        cuento_id = self.request.query_params.get('cuento')
+        if cuento_id:
+            return Linea.objects.filter(cuento_id=cuento_id)
+        return Linea.objects.all()
     
 class PictogramaViewSet(viewsets.ModelViewSet):
     queryset = Pictograma.objects.all()
